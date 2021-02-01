@@ -1,0 +1,101 @@
+---
+title: "Overview of R"
+output: html_notebook
+---
+
+#### Overview of R workspace and basic commands
+
+
+```{r}
+data.00 <- mtcars
+```
+
+#### Tidyverse standards and data wrangling
+
+```{r}
+library(tidyverse)
+```
+
+
+1. Every column is a unique variable
+2. Every row is a unique observation
+3. Only keep what you need in each dataset
+
+# Working with what you have
+- Filter for where cyl is 4
+```{r}
+# Filter for where cyl is 4
+filter(data.00, cyl == 4)
+# Subset columns
+select(data.00, mpg, cyl)
+
+data.00 %>% # Piping operator
+  filter(cyl == 4)
+
+data.00 %>%
+  select(mpg, cyl)
+
+### Creating something new
+data.00 %>%
+  mutate(mpg.per.cyl = mpg / cyl) %>%
+  group_by(cyl) %>%
+  summarize(mean.mpg.per.cyl = mean(mpg.per.cyl))
+
+# Quick plot
+plot(x = data.00$cyl, y = data.00$mpg, xlab = "Cylinders", ylab = "Miles per Gallon", col = "red", main = "MPG by number of Cylinders")
+```
+
+
+### Lab
+# Load the mpg dataset
+```{r}
+mpg
+```
+1. View the first 6 observations in two different ways
+```{r}
+head(mpg, 6)
+mpg[1:6,]
+slice(data.00, 1:6)
+str(mpg)
+```
+
+2. Find the average of 'cty' for compact cars?
+```{r}
+mpg %>%
+  group_by(class) %>%
+  summarize(mean_cty = mean(cty)) %>%
+  filter(class == 'compact')
+
+# Alternatively
+mpg %>%
+  select(class, cty) %>%  # Subset only desired variables
+  group_by(class) %>% # Collect all vehicles of the same class in the calculation
+  summarize(mean.cty = mean(cty)) %>%
+  filter(class == 'compact')
+```
+
+
+3. Create a new df with 5 variables: manufacturer, class, cyl, mean.hyw and hwy.per.cyl
+  - mean.hwy should be the average of 'hwy' for each manufacturer's classes of vehicles, by number of cylinders - group by manuf, class and no of cyl
+  - hwy.per.cyl should be the average ratio of hwy to cyl for each manufacturer's classes of vehicles, by number of cylinders
+  - Each manufacturer/class/cyl combination should have only one record in the dataframe
+  
+```{r}
+mpg %>%
+  mutate(hwy.per.cyl = hwy / cyl) %>%
+  group_by(manufacturer, class, cyl) %>% # Creates working groups
+  summarize(mean.hwy = mean(hwy),
+            hwy.per.cyl = mean(hwy.per.cyl)) %>%
+  select(manufacturer, class, cyl, mean.hwy, hwy.per.cyl)
+```
+
+  
+4. Plot 'hwy' against 'cty' for all 2008 models. Make the points blue 
+```{r}
+models_2008 <- mpg %>%
+  filter(year == 2008)
+
+plot(x = models_2008$hwy, y = models_2008$cty, type = 'p', col = "blue", main = "Hwy vs. cty for 2008 models", xlab = "Highway", ylab = "City")
+```
+
+  
