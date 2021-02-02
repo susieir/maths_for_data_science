@@ -1,0 +1,165 @@
+---
+title: "Linear Algebra"
+output: html_notebook
+---
+
+## Section 1 - Scalars Vectors and Matrices
+
+- Scalar - a constant
+- Vector - a single row or column of numbers
+- Matrix - a rectangular collection of numbers
+
+- Dimensions - refer to the number of rows and columns
+  - an rxc matrix - r rows and c columns
+  - The m~ij~ element is at row i and column j
+  
+- Vectors are a subset of matrices
+  - Either dimensions 1xc (a row vector) or rx1 (a column vector)
+  - And scalars are 1x1
+  
+- Vectors are used to represent a location in space. Each entry represents a dimension. This is easy to see in 1, 2 and 3 dimensions
+- Vectors are arrows, whenever we get beyond a single dimension
+
+## Section 2 - Application Scalars Vectors and Metrics
+
+1. Defining a vector [c(), :, seq(), rep()]
+- R is fully vectorized - default process is to think in terms of vectors (i.e. a collection of elements)
+
+```{r}
+# Using the c() function
+v1 <- c(2, 3, 4, 5)
+str(v1)
+# Using the ':' operator
+v2 <- 2:5 # From 2 to 5, default counter 1
+
+# USing the seq() function; a long-form version of the ':' operator
+v3 <- seq(from = 2, to = 5, by = 1)
+
+# OR...
+v3 <- seq(2, 5, 1)
+
+# Using the rep() function
+v4 <- rep(37, 5)  # Repeats 37 5x times
+```
+
+2. Defining a matrix [matrix(), rbind(), cbind()]
+- A matrix is just a collection of vectors
+```{r}
+# Using the matrix() function
+m1 <- matrix(c(1, 2, 3, 4, 5, 6), nrow = 2, ncol = 3, byrow = TRUE)
+# byrow = TRUE - takes arguments and populates rowwise
+m1
+# Default is FALSE
+# Useful to do it rowwise so can think rows first
+str(m1)
+
+# Using rbind()
+m2 <- rbind(c(1, 2, 3), c(4, 5, 6))
+m2
+# Using cbind()
+m3 <- cbind(c(1, 4), c(2, 5), c(3, 6))
+m3
+```
+
+3. Plots in 2D and 3D
+- Vector in 2-space
+```{r}
+# Vector in 2-space
+u1 <- c(2, 4)
+plot(u1[1], u1[2], type = 'p', col = 'red',
+     xlim = c(0, 5), ylim = c(0,5),
+     xlab = "", ylab = "")  
+arrows(x0 = 0, y0 = 0,
+       x1 = u1[1], y1 = u1[2],
+       lwd = 2)  
+# *0 - Tells where arrows should start
+# Use reference to tell plot elements
+```
+
+- Vector in 3-space
+```{r}
+library(plot3D)
+u2 <- c(2, 3, 4)
+points3D(x=u2[1], y=u2[2], z=u2[3], col = 'red',
+         xlim = c(0,5), ylim = c(0,5), zlim = c(0,5),
+         phi = 0)  # Changes view
+arrows3D(x0 = 0, y0 = 0, z0 = 0, x1 = u2[1], y1 = u2[2], z1 = u2[3],
+         lwd = 2,
+         add = TRUE)  # Adds to an existing plot - needed for 3D library
+```
+
+## Section 2 - LAB1 - Intro Scalars Vectors and Matrices
+1. Create a 3x4 matrix, A, fill row-wise with the number 1-12. What is a~24~?
+```{r}
+A <- matrix(seq(1,12,1), nrow = 3, ncol = 4, byrow = TRUE)
+A
+A[2,4]
+# a_24 = 8
+```
+
+2. Create two 1x2 vectors, v1 and v2, with numeric entities of your choice. Plot v1 and v2 on the same coordinate plane
+```{r}
+v1 <- c(5, 6)
+v2 <- c(1, 3)
+# Plot begins a session
+plot(v1[1], v1[2], type = 'p', col = 'red',
+     xlim = c(0,8), ylim = c(0,8),
+     xlab = "", ylab = "")
+arrows(x0 = 0, y0 = 0,
+       x1 = v1[1], y1 = v1[2],
+       lwd = 2, col = 'red')
+# Points adds additional points
+points(v2[1], v2[2], col = 'blue',
+     xlim = c(0,8), ylim = c(0,8),
+     xlab = "", ylab = "")
+
+arrows(x0 = 0, y0 = 0,
+       x1 = v2[1], y1 = v2[2],
+       lwd = 2, col = 'blue')
+```
+
+3. Now add 3 to the second entry in v1 and re-plot. Describe the position of the new vector in 2-space relative to v1
+```{r}
+v2_b <- c(v1[1], v1[2] +3)
+v2_b
+plot(v1[1], v1[2], type = 'p', col = 'red',
+     xlim = c(0,10), ylim = c(0,10),
+     xlab = "", ylab = "")
+plot(v2_b[1], v2_b[2], type = 'p', col = 'blue',
+     xlim = c(0,10), ylim = c(0,10),
+     xlab = "", ylab = "")
+arrows(x0 = 0, y0 = 0,
+       x1 = v1[1], y1 = v1[2],
+       lwd = 2, col = 'red')
+arrows(x0 = 0, y0 = 0,
+       x1 = v2_b[1], y1 = v2_b[2],
+       lwd = 2, col = 'blue')
+```
+
+4. Create a 1x3 vector, v3, with numeric entries of your choice. Plot v3 in 3-space
+```{r}
+v3 <- c(4, 5, 6)
+points3D(x=v3[1], y = v3[2], z = v3[3], col = "red",
+         xlim = c(0,8), ylim = c(0,8), zlim = c(0,8))
+arrows3D(x0 = 0, y0 = 0, z0 = 0,
+         x1 = v3[1], y1 = v3[2], z1 = v3[3],
+         lwd = 2, add = TRUE)
+```
+
+5. Fill in the blanks: A *vector* is a *matrix* with only one *row* or *column*
+
+## Section 3 - Vector operations
+- **Scalar multiplication** - a scalar times a vector
+  - Multiply each element of the vector by the scalar
+  - 3 x [-1, 2, 5] = [-3. 6, 15]
+  - The original vector is being **dilated** (stretched/compressed) by a factor equal to the scalar
+  - If scalar > 1, then stretched
+  - If scalar < 1, then compressed
+  - If <0, then the direction will be flipped
+  
+- **Vector addition** - adding two vectors
+  - Both vectors must have exactly the same dimensions
+  - Then we add element wise
+  - e.g. [2, 3] + [1, 4] = [3, 7]
+  - The second vector is being drawn from the end of the first vector to create a new vector
+
