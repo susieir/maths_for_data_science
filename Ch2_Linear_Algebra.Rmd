@@ -162,4 +162,114 @@ arrows3D(x0 = 0, y0 = 0, z0 = 0,
   - Then we add element wise
   - e.g. [2, 3] + [1, 4] = [3, 7]
   - The second vector is being drawn from the end of the first vector to create a new vector
+  
+- **Vector subtraction** - simply add the negative vector
+  - Multiply each element of the second vector by the scalar -1, then subtract
+  - v1 - v2 = v1 + -1*v2
+  - Net effect is the same as subtracting the second vector from the first element-wise
+  - r.h. [2, 3] - [1, 4] = [1, -1]
+  - Illustrates a more general rule:
+    - Multiplication and addition can be applied successively
+    - v1 + s*v2
+    - The order of operations is the same as with real number - multiply first, then add/subtract
+    - Multiple each element of the second vector by the scalar then subtract
+    - e.g. [2, 3] + 3 * [1, 4] = [5, 15]
+    
+- Linear algebra - in general, don't assume that rules in the real-number world still apply. The above is an exception
+
+## Section 4 - Application vector operations
+
+1. Plotting vectors
+#### Plotting a single vector in 2-space
+
+```{r}
+vecplot_2d <- function(vector, xax, yax, color) {
+  vec <- vector
+  plot(vec[1], vec[2], type = 'p', col = color,
+  xlim = xax, ylim = yax,
+  xlab = "", ylab = "")
+  arrows(x0 = 0, y0 = 0, x1 = vec[1], y1 = vec[2], lwd = 2, col = color)
+  text(x = vec[1], y = vec[2], 
+  labels = paste('(', vec[1], ',', vec[2], ')', sep=""),
+  pos = 3)  # Pos 3 is to the right
+  }
+```
+
+#### Apply the function
+```{r}
+vecplot_2d(vector = c(1,2), xax = c(0,4), yax = c(0,5), color="red")
+```
+
+#### Plotting a vector in 3-space
+```{r}
+library(plot3D)
+vecplot_3d <- function(vector, xax, yax, zax, color) {
+  vec <- vector
+  points3D(x = vec[1], y = vec[2], z = vec[3],
+           xlim = xax, ylim = yax, zlim = zax,
+    xlab = "x", ylab = "y", zlab = "z")
+text3D(x = vec[1] + 0.5, y = vec[2], z = vec[3],
+       labels = paste("(",vec[1], ",", vec[2], ",", vec[3],")", sep = ""),
+       add = TRUE)
+arrows3D(x0=0,y0=0,z0=0,
+         x1=vec[1], y1=vec[2], z1=vec[3], lwd = 2, col = color,
+         add = TRUE)
+}
+```
+
+### Apply the function
+```{r}
+vecplot_3d(vector = c(2, 3, 4), xax = c(0, 5), yax = c(0, 5), zax = c(0,5),
+           col = "green")
+```
+
+2. Scalar multiplication
+
+```{r}
+v1 <- 1:5
+v1
+2 * v1
+```
+3. Vector addition
+- Note that vectors must *all* be the same size
+- R has built in functionality where if the longer vector is a multiple of the shorter vector length then it will just replicate the addition
+  - Be careful not to let this happen accidentally!
+```{r}
+v2 <- c(-1, -2, -3, -4, -5)
+v1 + v2
+```
+
+4. Vector subtraction
+```{r}
+v1 - v2
+```
+5. Scalar multiplication and vector addition together
+```{r}
+v1 + 5 * v2
+```
+6. Plotting vector addition
+
+#### in 2-space
+```{r}
+vec.add.plot_2d <- function(vec1, vec2, xax, yax) {
+  to.plot <- as.data.frame(rbind(vec1, vec2, vec1 + vec2))
+  plot(to.plot[-2,]$v1, to.plot[-2,]$v2, type = 'p', col = "red",
+       lwd = 2, xlim = xax, ylim = yax)
+  
+  # Add arrows
+  arrows(x0 = 0, y0 = 0, x1 = to.plot[1,1], y1 = to.plot[1,2], lwd = 2, col = "blue")
+  arrows(x0 = to.plot[1,1], y0 = to.plot[1,2], x1 = to.plot[3,1], y1 = to.plot[3,2], col = "green", lwd = 2)
+  arrows(x0 = 0, y0 = 0, x1 = to.plot[3,1], y1 = to.plot[3,2], lwd = 2, col = "red")
+
+  # Add point labels
+  to.plot %>%
+    mutate(point = paste('(', v1, ',' ,v2, ')', sep="")) -> to.plot
+  with(to.plot[-2,], text(to.plot[-2,], labels = point, pos = 4))
+}
+```
+
+### Apply the function
+```{r}
+vec.add.plot_2d(vec1 = c(1, 2), vec2 = c(3, 4), xax = c(0, 10), yax = c(0, 10))
+```
 
