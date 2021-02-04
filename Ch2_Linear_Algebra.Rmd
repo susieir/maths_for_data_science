@@ -261,15 +261,206 @@ vec.add.plot_2d <- function(vec1, vec2, xax, yax) {
   arrows(x0 = to.plot[1,1], y0 = to.plot[1,2], x1 = to.plot[3,1], y1 = to.plot[3,2], col = "green", lwd = 2)
   arrows(x0 = 0, y0 = 0, x1 = to.plot[3,1], y1 = to.plot[3,2], lwd = 2, col = "red")
 
-  # Add point labels
-  to.plot %>%
-    mutate(point = paste('(', v1, ',' ,v2, ')', sep="")) -> to.plot
-  with(to.plot[-2,], text(to.plot[-2,], labels = point, pos = 4))
 }
 ```
 
 ### Apply the function
 ```{r}
 vec.add.plot_2d(vec1 = c(1, 2), vec2 = c(3, 4), xax = c(0, 10), yax = c(0, 10))
+```
+  # Add point labels - removed - not working
+  to.plot %>%
+    mutate(point = paste('(', v1, ',', v2, ')', sep="")) -> to.plot
+  with(to.plot[-2,], text(to.plot[-2,], labels = point, pos = 4))
+
+### in 3-space
+```{r}
+library(plot3D)
+vec.add.plot_3d <- function(vec1, vec2, xax, yax, zax, phi, theta) {
+  points3D(x = vec1[1], y = vec1[2], z = vec1[3], col = 'red',
+           xlim = xax, ylim = yax, zlim = zax,
+           xlab = "x", ylab = "y", zlab = "z",
+           phi = phi,
+           theta = theta)
+  text3D(x = vec1[1], y = vec1[2], z = vec1[3]+0.24,
+         labels = paste("<",vec1[1],",",vec1[2],",",vec1[3],")", sep=""), add = TRUE)
+  arrows3D(x0=0, y0=0, z0=0, x1 = vec1[1], y1 = vec1[2], z1 = vec1[3], lwd = 2, col = 'blue', add = TRUE)
+  points3D(x = vec1[1] + vec2[1], y = vec1[2] + vec2[2], z = vec1[3]+vec2[3], col = 'green', xlim = xax, ylim = yax, zlim = zax,
+           xlab = "x", ylab = "y", zlab = "z",
+           add = TRUE)
+  arrows3D(x0 = vec1[1], y0 = vec1[2], z0 = vec1[3],
+           x1 = vec1[1] + vec2[1], y1 = vec1[2] + vec2[2], z1 = vec1[3] + vec2[3], lwd = 2, col = 'red', add = TRUE)
+  
+  vec3 <- vec1 + vec2
+  points3D(x = vec3[1], y = vec3[2], z = vec3[4], col = 'red',
+           xlim = xax, ylim = yax, zlim = zax,
+           xlab = "x", ylab = "y", zlab = "z",
+           add = TRUE)
+  text3D(x = vec3[1], y = vec3[2], z = vec3[3],
+         labels = paste("(", vec3[1],",",vec3[2],",",vec3[3],")",sep=""), add = TRUE)
+  arrows3D(x0=0, y0=0, z0=0, x1=vec3[1], y1=vec3[2], z1=vec3[3], lwd = 2, col = "green", add = TRUE)
+
+}
+```
+
+#### Apply function
+```{r}
+vec.add.plot_3d(vec1 = c(1,2,3), vec2 = c(4, 5, 6), xax = c(0, 10), yax = c(0, 10), zax = c(0,10), phi = 0, theta = 30)
+```
+
+## Section 5 - Lab2 - Intro to vector operations
+
+1. Multiply vector v1, where v1 = [3, 5], by -3. What is the result?
+-3*v1 = [-9, -15]
+```{r}
+v1 <- c(3, 5)
+v1 * -3
+```
+
+
+2. Add v2 to v1 where v2 = [4, 2]
+v1 + v2 = [7, 7]
+```{r}
+v2 <- c(4, 2)
+v1 + v2
+```
+
+3. What is the sum of v2 and twice v1?
+v2 + 2v1 = [4, 2] + 2*[3, 5]
+= [10, 12]
+```{r}
+v2 + 2*v1
+```
+
+*By hand and programmatically*
+
+4. Plot v1 and v2, along with their sum v1 + v2
+```{r}
+vec.add.plot_2d(vec1 = v1, vec2 = v2, 
+                xax = c(0,10), yax = c(0, 10))
+```
+
+
+5. Add v3 = [0, 4, 3] and v4 = [4, 7, 5]
+v3 + v4 = [4, 11, 8]
+```{r}
+v3 <- c(0, 4, 3)
+v4 <- c(4, 7, 5)
+v3 + v4
+```
+
+6. Plot v3 and v4 along with their sum v3 + v4. Change the perspective to get a better view of the vectors
+
+```{r}
+vec.add.plot_3d(vec1 = v3, vec2 = v4, 
+                xax = c(0, 10), yax = c(0, 10), zax = c(0, 10),
+                phi = 0, theta = 15)
+```
+
+## Section 6 - Matrix operations - Addition, subtraction and multiplication
+
+#### Scalar multiplication of matrices
+- Exactly like with vectors
+  - Simply multiply each element of the matrix by the scalar
+
+#### Matrix additiona and subtraction
+- Exactly like with vectors
+  - Dimensions must be exactly the same
+  - Add or subtract element-wise
+  - If begin with a matrix and subtract the same matrix - end with a 0 matrix (special case)
+  
+#### Matrix multiplication
+- Only two matrices can be multiplied together at once
+  - The *inner dimensions* of the two matrices *must* be exactly the same
+    - E.g. a 2x4 matrix could be multiplied by a 4x3 matrix, but not by a 3x4
+    - The number of cols in matrix 1, must equal the number of rows in the second matrix
+    - Multiply element-wise using the rows from the first matrix and the columns from the second
+      - Then add the row/column products
+    - The dimensions of the product will be the *outer dimensions* of the two products
+    - Multiply first row of matrix A by first col of matrix B and add together
+      - Then the first row of matrix A by second col of matrix B and sum
+      - And repeat until reach last col
+
+- **Vector multiplication**
+  - Must be a row vector by a column vector, or column times row
+  - 1xn times nx1 or nx1 times 1xn
+  - Returns a scalar if 1xn times nx1
+  
+- Matrix multiplication is not commutative
+  - **order matters!**
+  - A * B != B * A
+  
+## Section 7 - Application - matrix operations, addition, subtraction, multiplication
+
+1. Scalar multiplication of matrices
+```{r}
+A <- matrix(c(-1, 2, 7, 0), nrow = 2, ncol = 2, byrow = TRUE)
+A
+2*A
+```
+
+2. Matrix addition and subtraction
+- Non-conformable arrays - dimensionality isn't correct
+```{r}
+A <- matrix(c(0, 1, 2, 3), nrow = 2, ncol = 2, byrow = TRUE)
+B <- matrix(c(0, -2, -5, 12), nrow = 2, ncol = 2, byrow = TRUE)
+A
+B
+A+B
+
+A2 <- matrix(1:6, nrow = 2, byrow = TRUE)
+A + A2
+
+C <- matrix(c(-3, 0, 1, 7, 4, -6), nrow = 3, byrow = TRUE)
+D <- matrix(c(-3, 0, 1, 7, 4, -6), nrow = 3, byrow = TRUE)
+
+C - D
+```
+
+
+3. Matrix multiplication
+- Need to be careful with R commands
+  - A * B -> doesn't give the right answer
+    - **Element-wise multiplication** - not true multiplication
+  - A %*% B is what you want
+```{r}
+A
+B
+A * B
+A %*% B
+# Both 2x2, expect a 2x2 answer
+
+C # 3x2
+D # 3x2
+# Can't do C %*% D
+
+B %*% A
+```
+
+## Section 8 - LAB3 - Intro matrix operations addition subtraction and multiplication
+
+1. Define two matrices. Let A by 3x4, filled row-wise with numbers 1-12. Let B be 4x2, filled column-wise with the numbers 1-8
+```{r}
+A <- matrix(1:12, nrow = 3, byrow = TRUE)
+B <- matrix(1:8, nrow = 4, byrow = TRUE)
+A
+B
+```
+
+
+2. Explain why A and B cannot be added or subtracted.
+A and B cannot be added or subtracted because their dimensions are not the same
+
+3. Create matrix C that can be added to A. Perform the addition.
+```{r}
+C <- matrix(13:24, nrow = 3, byrow = TRUE)
+C
+A + C
+```
+
+
+4. Find AxB before multiplying in R, anticipate the dimensions of the product, and multiply by hand
+```{r}
+A %*% B
 ```
 
