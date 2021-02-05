@@ -464,3 +464,302 @@ A + C
 A %*% B
 ```
 
+## Section 8 - Matrix operations - matrix transposes and inverses
+- **Transpose** - all of the elements switch positions
+  - Switch row/col position between every element
+  - If A is a 3X5 then A^T^ is a 5x3 matrix
+- **Inverse** of a matrix
+  - The matrix *must* be square
+  - Cannot have a row or column of all zeros
+  - Another condition exists - but it is more technical. Won't go into here, but quite rare
+  - If all satisfied - matrix is *invertible*
+  
+- For 2x2 matrix A (matrix(c(a, b, c, d), nrows = 2, byrow = TRUE))
+- All four elements are quotients
+  - Denominator is the product of one diag minus product of other diag
+  - Numerator
+    - a and d have swapped places
+    - b and c stay in the same place, but have been negated
+  - As dimensionality increases - the process becomes more complex
+
+- When a matrix is multiplied by its invese A*A^-1^
+  - Returns an **identity matrix**
+    - Any nxn matrix whose main diagonal is all 1s and has 0s everywhere else
+    - Any matrix times its corresponding identity matrix will yield itself
+      A*I = A (works like 1 in real number algebra)
+    - Any matrix times its inverse yields the corresponding identity matrix
+      A*A^-1^ = I (analagous to any number times its reciprocal in real number algebra)
+
+## Section 9 - Application - Matrix transposes and inverses
+
+1. Matrix transpose
+- The t function is handy, but needs a matrix type object passed to it
+- It doesn't work that well with a vector
+- Always pass t() a matrix object
+```{r}
+A <- matrix(1:12, nrow = 3, ncol = 2, byrow = TRUE)
+A
+
+A.t <- t(A)  # t() transposes matrix
+A.t
+
+v1 <- matrix(1:4, nrow=1)
+v1
+
+v1.t <- t(v1)
+v1.t
+```
+
+2. Matrix inverse
+- `A^-1` does not return the inverse - returns element wise reciprocation
+- I.e. taking each element and dividing by 1
+
+- If we want the inverse - `solve(A)`
+
+- Don't forget - only square matrices are invertible
+- Matrix can not have a row or column of 0's
+  - Returns - the system is exactly singular
+  - Means that the denominator is 0
+```{r}
+A <- matrix(1:4, nrow=2, byrow = TRUE)
+A
+
+A^-1 # Not what we expected!
+solve(A) # Produces the inverse
+
+B <- matrix(1:6, nrow = 2)
+solve(B)
+
+C <- matrix(c(1,2,0,0), nrow = 2)
+C
+solve(C)
+```
+
+3. Identity matrix
+- A matrix times its inverse gives the identity
+```{r}
+A %*% solve(A)
+# Machine error in both entries in col 2 - results in scientific error
+# Effectively an identity matrix
+# If we were to round then it comes out ok
+round(A %*% solve(A))
+```
+
+- Get the identity directly using `diag()`
+```{r}
+I2 <- diag(2)
+I2
+
+I3 <- diag(3)
+I3
+
+I7 <- diag(7)
+I7
+```
+
+- A matrix times the identity yields the matrix again
+```{r}
+A %*% I2
+```
+
+## Section 10 - Lab 4 - Intro Matrix Operations Transposes and Inverses
+
+1. Define matrix A as a square matrix with entries of your choice.
+```{r}
+A <- matrix(1:9, nrow = 3, byrow = TRUE)
+A
+```
+
+2. Find the transpose of A - by hand and in R
+```{r}
+A.t <- t(A)
+A.t
+```
+
+3. Find the inverse of A, if it exists. If it does not exist, define a new matrix A that is invertible
+```{r}
+A.inv = solve(A)
+A.inv
+
+A4 <- matrix(c(5, 2, 1, 7, 4, 8, 6, 3, 2), nrow = 3, byrow = TRUE)
+A4
+
+A4.inv = solve(A4)
+A4.inv
+```
+
+
+4. Multiply A by its inverse. Before - what is the expected result?
+```{r}
+round(A4 %*% A4.inv)
+```
+
+## Section 11 - What is linear regression
+1. Definition and Generic Model Statement
+- **Linear regression** - method of creating a *linear equation* to model the relationship between a dependent variable and one or more independent variable
+
+2. Deterministic example
+- Suppose you're going to a baseball game.
+  - Ticket cost = $20
+  - Hot dogs $3
+  - French fries $2
+- Your total cost can be modelled as a linear function of the ticket price and the number of hot dogs and French fries you purchase
+  - Total cost equals $20, plus $3 for every hot dog and $2 for every order of fries
+  - Mathematically: c = 20 + 3h + 2f
+  - h = no hot dogs, f = number of fries
+  - Linear regression comes in when we only have the data and need to estimate the coefficients in the equation
+
+3. Stochastic example
+```{r}
+mtcars
+```
+- Suppose you wish to model *mpg* as a function of *wt* and *qsec*
+  - The coefficients are unknown
+  - Via linear regression the model is:
+  mpg = 19.75 + (-5.05)*wt + 0.93 * qsec + error
+  - Coeffs - how much of a contribution to the independent variable do the dependent variables make
+
+## Section 12 - Application - what is linear regression
+
+1. Deterministic example
+- Var1 -> hotdogs
+- Var2 -> fries
+- game-cost -> shows all different possible combinations of fries and hot.dogs
+```{r}
+library(tidyverse)
+
+# Create hot dog data and plot
+hot.dogs <- 0:20  # The number of hot dogs purchased
+fries <- 0:20  # The number of fries purchased
+game.cost <- expand.grid(hot.dogs, fries)
+# Creates a cross-product of the two variables
+game.cost
+colnames(game.cost) <- c('Hot.dogs', 'Fries')
+game.cost <- game.cost %>%
+  mutate(Ticket = 20,
+         Total.Cost = Ticket + 3*Hot.dogs + 2*Fries)
+
+
+### Create a plot
+library(rgl)
+plot3d(x = game.cost$Hot.dogs,
+       y = game.cost$Fries,
+       z = game.cost$Total.Cost,
+       type = 'p',
+       col = 'green',
+       xlim = c(0,20),
+       ylim = c(0,20),
+       zlim = c(0,120),
+       xlab = "Hot Dogs purchased",
+       ylab = "French Fries purchased",
+       zlab = "Total Cost")
+
+### Use lm() function (linear model) to estimate a linear model
+hot.dog.model <- lm(Total.Cost ~ Hot.dogs + Fries, data=game.cost)
+hot.dog.model
+summary(hot.dog.model)
+
+```
+- Estimate column - shows the coefficients
+
+2. Stochastic example
+```{r}
+view(mtcars)  # Opens up df in separate tab
+
+### Create a plot
+plot3d(x = mtcars$wt,
+       y = mtcars$qsec,
+       z = mtcars$mpg,
+       type = 's',
+       col = 'green',
+       xlim = c(min(mtcars$wt)-1, max(mtcars$wt)+1),
+       ylim = c(min(mtcars$qsec)-1, max(mtcars$qsec)+1),
+       zlim = c(min(mtcars$mpg)-1, max(mtcars$mpg)+1),
+       xlab = 'Wt',
+       ylab = 'Qsec',
+       zlab = 'MPG')
+
+# Use lm() to fit a linear regression  model
+mpg.model <- lm(mpg ~ wt + qsec, data = mtcars)
+mpg.model
+
+# Plot model vs. actuals
+plot(mtcars$mpg, mpg.model$fitted.values)  # Want a line
+# Fitted values calculated from the regression formula
+
+# Plot model vs. actuals
+plot3d(x = mtcars$wt,
+       y = mtcars$qsec,
+       z = mpg.model$fitted.values,
+       type = "s",
+       col = "red",
+       xlim = c(min(mtcars$wt)-1, max(mtcars$wt)+1),
+       ylim = c(min(mtcars$qsec)-1, max(mtcars$qsec)+1),
+       zlim = c(min(mtcars$mpg)-1, max(mtcars$mpg)+1),
+       xlab = "Wt",
+       ylab = "Qsec",
+       zlab = "MPG",
+       add = TRUE)
+
+```
+
+3. Model error
+```{r}
+# Different outputs
+mpg.model # Gives you the 'beta' vector
+summary(mpg.model) # Gives you more detailed output
+```
+- Calculating error measures for the model
+```{r}
+error.measures <- as.data.frame(cbind(mtcars$mpg, mpg.model$fitted.values))
+colnames(error.measures) <- c('Actuals', 'Predicted.Values')
+error.measures <- error.measures %>%
+  mutate(error = Actuals - Predicted.Values,
+         squared.error = error ^ 2)
+error.measures
+
+# Why square the errors?
+sum(error.measures$error)  # Essentially 0
+# Regression equation fits perfectly balanced through the equation data
+# To get around this - we square the errors
+boxplot(error.measures$error)  # Evenly distributed
+boxplot(error.measures$squared.error)  # Knocked things out of scale
+# Advantage - get rid of negatives
+# Disadvantage - knock everything out of scale
+
+# mse and rmse
+mean.squared.error <- mean(error.measures$squared.error)
+mean.squared.error
+
+root.mse <- sqrt(mean.squared.error)
+root.mse
+# root.mse brings squared error back into original scale
+# RMSE is the measure of total error in the model
+# On average - predicted value would be about 2.5 units out in one direction or other
+```
+# Section 13 - Lab 5 - Intro to What is Linear Regression
+
+1. Download the 'Baseball2018.csv' dataset and load it into R using read.csv()
+- No access to 'Baseball2018.csv'
+```{r}
+mtcars
+
+```
+
+
+2. Plot *Runs* vs. *HomeRun* and *Runs* vs. *H9*. Of *HomeRun* and *H9*, which appears to be more closely related to *Runs*? Plot *Runs* vs. *HomeRun* and *H9* in 3-space
+```{r}
+# Independent variable - mpg
+# Dependent variables - hp (horsepower), disp (displacement)
+
+# Plot mpg and horsepower
+plot(mtcars$hp, mtcars$mpg) # Negative relationship (non linear?)
+# Plot mpg and displacement
+plot(mtcars$disp, mtcars$mpg) # Also negative relationship
+# 3D plot mpg, disp and hp
+```
+
+
+3. Use the `lm()` function to estimate the linear regression model for *Runs* as a function of *HomeRun* and *H9*. Write the regression equation. Plot fitted values against actuals. How accurate would you say the predictions are?
+4. Calculate the RMSE for the model and offer an interpretation for the value in the context of the problem. Does this change your perception of the quality of the model predictions?
+
